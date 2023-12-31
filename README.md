@@ -29,6 +29,7 @@ Copier template for adding a hexdoc plugin to a Hex Casting addon.
   * Branch: `gh-pages`
   * Folder: `/docs`
 * Save your changes.
+  * This will trigger a `pages-build-deployment` workflow run, which will probably fail because the `docs/` folder doesn't exist on your `gh-pages` branch - this is expected, you can safely ignore the error.
 * Push the commits that added your plugin, monitor the Actions tab, and cross your fingers!
 
 ### Setting up a PyPI account (optional, but highly recommended)
