@@ -17,20 +17,7 @@ Copier template for adding a hexdoc plugin to a Hex Casting addon.
 
 ### Setting up Pages
 
-* Run these commands to create an empty branch for GitHub Pages:
-  ```sh
-  git switch --orphan gh-pages
-  git commit --allow-empty -m "Initial commit"
-  git push -u origin gh-pages
-  ```
-* Go to your GitHub repo settings > Pages > Build and deployment.
-* Set these values:
-  * Source: `Deploy from a branch`
-  * Branch: `gh-pages`
-  * Folder: `/docs`
-* Save your changes.
-  * This will trigger a `pages-build-deployment` workflow run, which will probably fail because the `docs/` folder doesn't exist on your `gh-pages` branch - this is expected, you can safely ignore the error.
-* Push the commits that added your plugin, monitor the Actions tab, and cross your fingers!
+Follow these steps to set up GitHub Pages: https://hexdoc.hexxy.media/docs/guides/deployment/github-pages
 
 ### Setting up a PyPI account (optional, but highly recommended)
 
@@ -44,7 +31,7 @@ PyPI is the main Python package repository (like Node's NPM). hexdoc plugins are
 * Go to your GitHub repo settings > Environments, and create an environment called `pypi`.
 * Try releasing the plugin to PyPI (push a tag, push a commit starting with `[Release]`, or manually run the hexdoc workflow from the Actions tab).
 
-The default version number for your plugin is `1.0.dev0`. You can bump this by editing `doc/src/hexdoc_yourmodid/__version__.py`, or by manually running the hexdoc workflow and typing `major`, `minor`, `patch`, `dev`, and/or `release` in the "increment version" field.
+The default version number for your plugin is `1.0.dev0`. You can update this version by editing `doc/src/hexdoc_yourmodid/__version__.py`.
 
 ### Next steps
 
