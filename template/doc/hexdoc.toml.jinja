@@ -5,13 +5,13 @@ default_branch = "{{ default_branch }}"
 
 resource_dirs = [  # top takes priority
     "resources",
-    "{_common.src}/main/resources",
-    { path="{^_common.src}/generated/resources", required=false },
+    "{$_common.src}/main/resources",
+    { path="{$_common.src}/generated/resources", required=false },
     {%- if multiloader %}
-    "{_fabric.src}/main/resources",
-    { path="{^_fabric.src}/generated/resources", required=false },
-    "{_forge.src}/main/resources",
-    { path="{^_forge.src}/generated/resources", required=false },
+    "{$_fabric.src}/main/resources",
+    { path="{$_fabric.src}/generated/resources", required=false },
+    "{$_forge.src}/main/resources",
+    { path="{$_forge.src}/generated/resources", required=false },
     {%- endif %}
     { modid="hexcasting" },
     { modid="minecraft" },
@@ -39,7 +39,7 @@ _pattern_regex = { "!Raw"='{{ pattern_regex.regex }}' }
 _per_world_value = "{{ pattern_regex.per_world_value }}"
 
 [[extra.hexcasting.pattern_stubs]]
-path = "{^^^_common.package}/{{ pattern_registry }}"
+path = "{$_common.package}/{{ pattern_registry }}"
 regex = "{^_pattern_regex}"
 per_world_value = "{^_per_world_value}"
 

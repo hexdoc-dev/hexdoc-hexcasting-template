@@ -32,12 +32,12 @@ key = "{{ gradle_mod_version_key }}"
 
 [tool.hatch.metadata.hooks.gradle-properties]
 dependencies = [
-    { package="hexdoc-hexcasting", op="~=", py-version="1.0.dev20", key="hexcastingVersion" },
+    { package="hexdoc-hexcasting", op="~=", py-version="1.0", key="hexcastingVersion" },
 ]
 
 [tool.hatch.metadata.hooks.gradle-properties.optional-dependencies]
 dev = [
-    "ruff~=0.1.4",
+    "ruff~=0.11.2",
 ]
 
 # directory inclusion
