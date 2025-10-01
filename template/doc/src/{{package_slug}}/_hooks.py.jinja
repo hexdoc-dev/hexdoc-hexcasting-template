@@ -11,18 +11,18 @@ from hexdoc.plugin import (
 
 import {{ package_slug }}
 
-from .__gradle_version__ import FULL_VERSION, GRADLE_VERSION
+from .__gradle_version__ import FULL_VERSION, GRADLE_VERSION{%+ if minecraft_version_in_mod_version +%}, MINECRAFT_VERSION{%+ endif +%}
 from .__version__ import PY_VERSION
 
 
-class {{ hexdoc_plugin_classname }}(ModPluginImpl):
+class {{ classname }}Plugin(ModPluginImpl):
     @staticmethod
     @hookimpl
     def hexdoc_mod_plugin(branch: str) -> ModPlugin:
-        return {{ hexdoc_mod_plugin_classname }}(branch=branch)
+        return {{ classname }}ModPlugin(branch=branch)
 
 
-class {{ hexdoc_mod_plugin_classname }}(ModPluginWithBook):
+class {{ classname }}ModPlugin(ModPluginWithBook):
     @property
     @override
     def modid(self) -> str:
@@ -36,7 +36,11 @@ class {{ hexdoc_mod_plugin_classname }}(ModPluginWithBook):
     @property
     @override
     def mod_version(self) -> str:
+        {% if minecraft_version_in_mod_version %}
+        return f"{GRADLE_VERSION}+{MINECRAFT_VERSION}"
+        {% else %}
         return GRADLE_VERSION
+        {% endif%}
 
     @property
     @override

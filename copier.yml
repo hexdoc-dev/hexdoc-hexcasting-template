@@ -1,3 +1,162 @@
+# questions
+
+# mod name and id
+
+modid:
+  type: str
+  help: Mod ID (eg. minecraft, hexcasting)
+  validator: |
+    {%- import "macros/validators.jinja" as validators -%}
+    {{- validators.not_empty(modid) -}}
+    {{- validators.regex(modid, "^[a-z][a-z0-9_]{1,63}$") -}}
+
+mod_display_name:
+  type: str
+  help: Mod display name
+  default: "{{ modid|capitalize|replace('_', ' ') }}"
+
+mod_description:
+  type: str
+  help: Mod description
+  default: "{{ mod_display_name }} addon for Hex Casting."
+
+github_user:
+  type: str
+  help: GitHub username
+  validator: |
+    {%- import "macros/validators.jinja" as validators -%}
+    {{- validators.not_empty(github_user) -}}
+
+github_repo:
+  type: str
+  help: GitHub repository name
+  default: "{{ modid }}"
+
+main_branch:
+  type: str
+  help: Primary branch name (eg. main, master)
+  default: main
+
+minecraft_version:
+  type: str
+  help: Minecraft version
+  choices:
+    - "1.19.2"
+    - "1.20.1"
+  default: "1.20.1"
+
+patchouli_book_id:
+  when: "{{ minecraft_version == '1.19.2' }}"
+  type: str
+  help: Patchouli book ID
+  default: hexcasting:thehexbook
+
+# mod structure
+
+gradle_mod_version_key:
+  type: str
+  help: Key in gradle.properties that contains your mod's version number
+  default: modVersion
+
+minecraft_version_in_mod_version:
+  type: bool
+  help: Is the Minecraft version included in your mod version? (eg. v{{ mod_version }}+1.20.1)
+  default: false
+
+gradle_minecraft_version_key:
+  when: "{{ minecraft_version_in_mod_version }}"
+  type: str
+  help: Key in gradle.properties that contains the Minecraft version for your mod
+  default: minecraftVersion
+
+gradle_deps_type:
+  type: str
+  help: Where are your Gradle dependencies stored?
+  choices:
+    - gradle.properties
+    - gradle/libs.versions.toml
+
+version_catalog:
+  when: false
+  type: bool
+  default: "{{ gradle_deps_type == 'gradle/libs.versions.toml' }}"
+
+gradle_hex_version_key:
+  type: str
+  help: "{{ 'Version name in gradle/libs.versions.toml' if version_catalog else 'Key in gradle.properties' }} that contains the Hex Casting version for your mod"
+  default: "{{ 'hexcasting' if version_catalog else 'hexcastingVersion' }}"
+
+multiloader:
+  type: bool
+  help: Does your mod support multiple platforms?
+  default: true
+
+capitalize_platforms:
+  when: "{{ multiloader }}"
+  type: bool
+  help: Are your platform directory names capitalized? (eg. Common vs common)
+  default: false
+
+common_path:
+  when: false
+  default: "{{ 'Common' if capitalize_platforms else 'common' }}"
+
+fabric_path:
+  when: false
+  default: "{{ 'Fabric' if capitalize_platforms else 'fabric' }}"
+
+forge_path:
+  when: false
+  default: "{{ 'Forge' if capitalize_platforms else 'forge' }}"
+
+pattern_registry_path:
+  type: str
+  help: Path to the file where your patterns are registered (relative to {{ common_path~'/' if multiloader }}src/)
+  default: main/java/io/github/{{ github_user|lower }}/{{ modid }}/registry/{{ classname }}Patterns.java
+
+# advanced
+
+advanced:
+  type: bool
+  help: Show advanced options?
+  default: false
+
+classname:
+  when: "{{ advanced }}"
+  type: str
+  help: "Classname base (eg. '{{ modid|capitalize }}' -> '{{ modid|capitalize }}Client.java')"
+  default: "{{ modid|replace('_', '')|capitalize }}"
+  validator: |
+    {%- import "macros/validators.jinja" as validators -%}
+    {{- validators.not_empty(classname) -}}
+    {{- validators.java_identifier(classname) -}}
+
+package_name:
+  when: "{{ advanced }}"
+  type: str
+  default: "hexdoc-{{ modid|replace('_', '-')|lower }}"
+
+package_slug:
+  when: "{{ advanced }}"
+  type: str
+  default: "hexdoc_{{ modid|lower }}"
+
+source_url:
+  when: "{{ advanced }}"
+  type: str
+  default: "https://github.com/{{ github_user }}/{{ github_repo }}"
+
+pages_url:
+  when: "{{ advanced }}"
+  type: str
+  default: "https://{{ github_user|lower }}.github.io/{{ github_repo }}"
+
+generate_vscode:
+  when: "{{ advanced }}"
+  type: bool
+  help: Generate files in .vscode/?
+  default: true
+
 # Copier settings (not prompted)
 
 _subdirectory: template
@@ -21,82 +180,17 @@ _exclude:
   - ".DS_Store"
   - ".svn"
 
-# mod name and id
+_envops:
+  keep_trailing_newline: true
+  trim_blocks: true
+  lstrip_blocks: true
 
-modid:
-  type: str
-
-mod_display_name: "{{ modid|capitalize }}"
-
-book_id: "hexcasting:thehexbook"
-
-# hexdoc plugin
-
-package_name: "hexdoc-{{ modid|replace('_', '-')|lower }}"
-
-package_slug: "hexdoc_{{ modid|replace('-', '_')|lower }}"
-
-package_src: "doc/src/{{ package_slug }}"
-
-package_export_root: "{{ package_src }}/_export"
-
-hexdoc_plugin_classname: "{{ modid|capitalize }}Plugin"
-
-hexdoc_mod_plugin_classname: "{{ modid|capitalize }}ModPlugin"
-
-# mod structure
-
-multiloader:
-  type: bool
-  default: true
-
-gradle_mod_version_key: "modVersion"
-
-java_lang:
-  type: yaml
-  choices:
-    Java:
-      value: &java_lang_default
-        src: java
-        ext: java
-    Kotlin:
-      value:
-        src: kotlin
-        ext: kt
-  default: *java_lang_default
-
-java_package: "com/example/{{ modid }}"
-
-pattern_registry: "registry/{{ modid|capitalize }}PatternRegistry.{{ java_lang.ext }}"
-
-pattern_regex:
-  type: yaml
-  choices:
-    Hex Casting (1.20):
-      value: &pattern_regex_default
-        regex: 'make\(\s*"(?P<name>[a-zA-Z0-9_\/]+)",\s*(?:new )?(?:ActionRegistryEntry|OperationAction)\(\s*HexPattern\.fromAngles\(\s*"(?P<signature>[aqweds]+)",\s*HexDir.(?P<startdir>\w+)\)'
-        per_world_value: "true"
-    Hex Casting (1.19):
-      value:
-        regex: 'HexPattern\.fromAngles\("(?P<signature>[qweasd]+)", HexDir\.(?P<startdir>\w+)\),\s*modLoc\("(?P<name>[^"]+)"\)[^;]+?(?:makeConstantOp|Op\w+|Widget\.\w+)(?:[^;]*(?P<is_per_world>true)\);)?'
-        per_world_value: "true"
-    Hexal (1.20):
-      value:
-        regex: 'make\(\s*"(?P<name>[a-zA-Z0-9_\/]+)",\s*HexPattern\.fromAngles\(\s*"(?P<signature>[aqweds]+)",\s*HexDir.(?P<startdir>\w+)\)'
-        per_world_value: "true"
-    Hexal (1.19):
-      value:
-        regex: (?s-m:HexPattern\.fromAngles\("(?P<signature>[qweasd]+)", HexDir\.(?P<startdir>\w+)\),\s*modLoc\("(?P<name>[^"]+)"\),[^,]+?(?:makeConstantOp|Op\w+).*?(?P<is_per_world>\btrue)?\)(?:[^\)]+?\bval\b|(?:(?!\bval\b)(?:.))+$))
-        per_world_value: "true"
-  default: *pattern_regex_default
-
-# GitHub
-
-github_repo: "{{ modid|capitalize }}"
-
-author:
-  type: str
-
-default_branch: main
-
-pages_url: "https://{{ author|lower }}.github.io/{{ github_repo }}/"
+_message_after_copy: |-
+  Next steps:
+  - Check your .gitignore{{ ' and .vscode/' if generate_vscode }} for merge conflicts.
+  - Make sure the file paths, pattern regex, and other configs in pyproject.toml and doc/hexdoc.toml match your actual project structure.
+  - Set up your Python environment and lockfile:
+      uv sync
+  - Try out your new hexdoc book:
+      uv run hexdoc serve
+  - Set up GitHub Pages: https://hexdoc.hexxy.media/docs/guides/deployment/github-pages

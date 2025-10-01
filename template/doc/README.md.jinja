@@ -2,6 +2,8 @@
 
 Python web book docgen and [hexdoc](https://pypi.org/project/hexdoc) plugin for {{ mod_display_name }}.
 
+{{ mod_description }}
+
 ## Version scheme
 
 We use [hatch-gradle-version](https://pypi.org/project/hatch-gradle-version) to generate the version number based on whichever mod version the docgen was built with.
@@ -15,40 +17,41 @@ For example:
 
 ## Setup
 
-Install Python 3.12.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then:
 
 ```sh
-python3.12 -m venv venv
+uv sync
 
-.\venv\Scripts\activate   # Windows
-. venv/bin/activate.fish  # fish
-source venv/bin/activate  # everything else
-
-# run from the repo root, not doc/
-pip install -e .[dev]
+.\.venv\Scripts\activate   # Windows
+. .venv/bin/activate.fish  # fish
+source .venv/bin/activate  # everything else
 ```
 
 ## Usage
 
 For local testing, create a file called `.env` in the repo root following this template:
 ```sh
-GITHUB_REPOSITORY={{ author }}/{{ github_repo }}
-GITHUB_SHA={{ default_branch }}
+GITHUB_REPOSITORY={{ github_user }}/{{ github_repo }}
+GITHUB_SHA={{ main_branch }}
 GITHUB_PAGES_URL={{ pages_url }}
 ```
 
 Useful commands:
+
 ```sh
+# update your Python environment and lockfile if you added new dependencies
+uv sync
+
 # show help
 hexdoc -h
 
-# build, merge, and serve the web book in watch mode
+# render and serve the web book in watch mode
 nodemon --config doc/nodemon.json
 
-# build, merge, and serve the web book
+# render and serve the web book
 hexdoc serve
 
-# manually build and merge the web book
+# build and merge the web book
 hexdoc build
 hexdoc merge
 

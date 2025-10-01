@@ -1,8 +1,13 @@
 [defaults]
-modid = "mod"
-multiloader = false
-java_package = "com/package"
-pattern_registry = "Patterns.java"
-author = "Author"
+modid = "example_mod"
+github_user = "hexdoc-dev"
 
-[output.".ctt/test_copier"]
+[output.".ctt/multiloader_catalog_1.20"]
+minecraft_version = "1.19.2"
+multiloader = true
+gradle_deps_type = "gradle/libs.versions.toml"
+
+[output.".ctt/single_platform_properties_1.19"]
+minecraft_version = "1.20.1"
+multiloader = false
+gradle_deps_type = "gradle.properties"

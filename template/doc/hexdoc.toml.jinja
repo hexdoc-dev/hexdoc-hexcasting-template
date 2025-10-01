@@ -1,25 +1,27 @@
 modid = "{{ modid }}"
-book = "{{ book_id }}"
-default_lang = "en_us"
-default_branch = "{{ default_branch }}"
+book = "{{ patchouli_book_id }}"
 
 resource_dirs = [  # top takes priority
     "resources",
+{% if multiloader %}
     "{$_common.src}/main/resources",
     { path="{$_common.src}/generated/resources", required=false },
-    {%- if multiloader %}
     "{$_fabric.src}/main/resources",
     { path="{$_fabric.src}/generated/resources", required=false },
     "{$_forge.src}/main/resources",
     { path="{$_forge.src}/generated/resources", required=false },
-    {%- endif %}
+{% else %}
+    "{$_project.src}/main/resources",
+    { path="{$_project.src}/generated/resources", required=false },
+{% endif %}
     { modid="hexcasting" },
     { modid="minecraft" },
     { modid="hexdoc" },
 ]
-export_dir = "{{ package_export_root.removeprefix('doc/') }}/generated"
+export_dir = "src/{{ package_slug }}/_export/generated"
 
 [template]
+# TODO: change this to point to your actual mod icon
 icon = "icon.png"
 include = [
     "{{ modid }}",
@@ -29,32 +31,38 @@ include = [
 
 [template.args]
 mod_name = "{{ mod_display_name }}"
-author = "{{ author }}"
+author = "{{ github_user }}"
 show_landing_text = false
 
 [extra.hexcasting]
-# regexes for parsing pattern registry files - try running copier update and picking a different regex if your patterns aren't loading
+# regexes for parsing pattern registry files - if some or all of your patterns aren't being detected by hexdoc, this may need to be updated
 # NOTE: "!Raw" means "don't apply variable interpolation to this value"
-_pattern_regex = { "!Raw"='{{ pattern_regex.regex }}' }
-_per_world_value = "{{ pattern_regex.per_world_value }}"
+{% if minecraft_version == '1.20.1' %}
+_pattern_regex = { "!Raw"='make\(\s*"(?P<name>[a-zA-Z0-9_\/]+)",\s*(?:new )?(?:ActionRegistryEntry|OperationAction)\(\s*HexPattern\.fromAngles\(\s*"(?P<signature>[aqweds]+)",\s*HexDir.(?P<startdir>\w+)\)' }
+{% else %}
+_pattern_regex = { "!Raw"='HexPattern\.fromAngles\("(?P<signature>[qweasd]+)", HexDir\.(?P<startdir>\w+)\),\s*modLoc\("(?P<name>[^"]+)"\)[^;]+?(?:makeConstantOp|Op\w+|Widget\.\w+)(?:[^;]*(?P<is_per_world>true)\);)?' }
+_per_world_value = "true"
+{% endif %}
 
 [[extra.hexcasting.pattern_stubs]]
-path = "{$_common.package}/{{ pattern_registry }}"
+path = "{{ '{$_common.src}' if multiloader else '{$_project.src}' }}/{{ pattern_registry_path }}"
 regex = "{^_pattern_regex}"
+{% if minecraft_version == "1.19.2" %}
 per_world_value = "{^_per_world_value}"
+{% endif %}
 
-# platforms
+# source paths
 
+{% if multiloader %}
 [_common]
-src = "../{{ 'common/src' if multiloader else 'src' }}"
-package = "{src}/main/{{ java_lang.src }}/{{ java_package }}"
-{%- if multiloader %}
+src = "../{{ common_path }}/src"
 
 [_fabric]
-src = "../fabric/src"
-package = "{src}/main/{{ java_lang.src }}/{{ java_package }}/fabric"
+src = "../{{ fabric_path }}/src"
 
 [_forge]
-src = "../forge/src"
-package = "{src}/main/{{ java_lang.src }}/{{ java_package }}/forge"
-{%- endif %}
+src = "../{{ forge_path }}/src"
+{% else %}
+[_project]
+src = "../src"
+{% endif %}
